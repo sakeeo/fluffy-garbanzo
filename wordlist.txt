@@ -1,0 +1,13 @@
+admin
+login
+config
+secret
+hidden
+images
+files
+public
+private
+robots
+rahasia
+.htaccess
+
