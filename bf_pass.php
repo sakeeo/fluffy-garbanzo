@@ -1,5 +1,5 @@
 <?php
-$loginUrl = "http://192.168.17.5/cyber.security/simulasi-traversal/login.php";
+$loginUrl = "http://localhost/simulasi-traversal/login.php";
 $username = "admin";
 $wordlistFile = "passwordlist.txt";
 

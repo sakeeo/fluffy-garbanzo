@@ -1,5 +1,5 @@
 <?php
-$baseUrl = "https://de1e-119-18-155-10.ngrok-free.app/simulasi-traversal/"; 
+$baseUrl = "http://192.168.17.5/cyber.security/simulasi-traversal/"; 
 $wordlistFile = "wordlist.txt"; 
 
 // Periksa apakah file wordlist ada
